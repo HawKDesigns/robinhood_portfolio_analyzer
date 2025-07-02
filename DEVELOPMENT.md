@@ -13,7 +13,7 @@
 1. **Clone the repository**:
 
 ```bash
-git clone https://github.com/yourrexdivakar/robinhood_portfolio_analyzer.git
+git clone https://github.com/rexdivakar/robinhood_portfolio_analyzer.git
 cd robinhood_portfolio_analyzer
 ```
 
