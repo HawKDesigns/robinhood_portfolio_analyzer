@@ -34,7 +34,7 @@ A Python-based tool for analyzing and visualizing your investment portfolio data
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/yourusername/robinhood_portfolio_analyzer.git
+    git clone https://github.com/yourrexdivakar/robinhood_portfolio_analyzer.git
     cd robinhood_portfolio_analyzer
     ```
 
@@ -208,7 +208,7 @@ Then edit `config.json` to adjust settings like:
 
 If you encounter any issues or have questions:
 
-1. Check the [Issues](https://github.com/yourusername/robinhood_portfolio_analyzer/issues) page
+1. Check the [Issues](https://github.com/yourrexdivakar/robinhood_portfolio_analyzer/issues) page
 2. Create a new issue with detailed information about your problem
 3. Include your Python version and OS information
 
