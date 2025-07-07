@@ -88,6 +88,13 @@ The tool supports various command line arguments for customization:
 python main.py --help
 ```
 
+Common examples:
+
+```bash
+python main.py --save    # generate PDF report
+python main.py --html    # generate interactive HTML report
+```
+
 ## Output
 
 The analyzer generates:
