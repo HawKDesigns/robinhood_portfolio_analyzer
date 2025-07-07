@@ -390,13 +390,18 @@ class EnhancedPortfolioAnalyzer:
             if self.df is None:
                 raise ValueError("No data loaded. Call load_data() first.")
             
-            # Filter for buy/sell transactions
+
+
+            # Filter for transactions that impact holdings
+            valid_codes = [
+                'Buy', 'Sell', 'Dividend Reinvestment',
+                'BTO', 'BTC', 'STC', 'STO', 'SPR'
+            ]
             buy_sell_df = self.df[
-                (self.df['Trans Code'].isin(['Buy', 'Sell', 'Dividend Reinvestment'])) &
+                (self.df['Trans Code'].isin(valid_codes)) &
                 (self.df['Instrument'].notna()) &
                 (self.df['Instrument'] != '') &
-                (self.df['Quantity'].notna()) &
-                (self.df['Price'].notna())
+                (self.df['Quantity'].notna())
             ].copy()
             
             logger.info(f"Processing {len(buy_sell_df)} buy/sell transactions")
@@ -419,10 +424,10 @@ class EnhancedPortfolioAnalyzer:
                     }
                 
                 # Process transaction
-                if action in ['Buy', 'Dividend Reinvestment']:
+                if action in ['Buy', 'Dividend Reinvestment', 'BTO', 'BTC']:
                     self.holdings[symbol]['quantity'] += quantity
                     self.holdings[symbol]['total_cost'] += quantity * price
-                elif action == 'Sell':
+                elif action in ['Sell', 'STC', 'STO']:
                     self.holdings[symbol]['quantity'] -= quantity
                     # Reduce total cost proportionally
                     if self.holdings[symbol]['quantity'] > 0:
@@ -430,6 +435,19 @@ class EnhancedPortfolioAnalyzer:
                         self.holdings[symbol]['total_cost'] -= quantity * cost_per_share
                     else:
                         self.holdings[symbol]['total_cost'] = 0
+
+
+                 elif action == 'SPR':
+                    # Handle stock splits by adjusting share count without altering cost basis
+                    qty_str = str(row['Quantity'])
+                    try:
+                        new_qty = float(re.sub(r'[^0-9.]+', '', qty_str))
+                    except ValueError:
+                        new_qty = self.holdings[symbol]['quantity']
+                    if self.holdings[symbol]['quantity'] > 0:
+                        self.holdings[symbol]['quantity'] = new_qty
+                    else:
+                        self.holdings[symbol]['quantity'] = new_qty
                 
                 # Store transaction for reference
                 self.holdings[symbol]['transactions'].append({
