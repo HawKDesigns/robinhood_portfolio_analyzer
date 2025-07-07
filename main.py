@@ -2663,17 +2663,8 @@ def save_analysis_to_html(content, metrics, filename="portfolio_analysis.html"):
 </html>
 """
 
-
         # Write using UTF-8 to handle emojis and other unicode characters
         with open(filename, "w", encoding="utf-8") as f:
-
-
-        # Write using UTF-8 to handle emojis and other unicode characters
-        with open(filename, "w", encoding="utf-8") as f:
-
-        with open(filename, "w") as f:
-
-
             f.write(html_content)
         print(f"✅ HTML report saved successfully: {filename}")
         return True
@@ -2686,6 +2677,7 @@ def capture_analysis_output(return_metrics: bool = False):
 
     If ``return_metrics`` is True, also return the metrics dictionary.
     """
+
     
     output_buffer = io.StringIO()
     
