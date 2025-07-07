@@ -435,9 +435,7 @@ class EnhancedPortfolioAnalyzer:
                         self.holdings[symbol]['total_cost'] -= quantity * cost_per_share
                     else:
                         self.holdings[symbol]['total_cost'] = 0
-
-
-                 elif action == 'SPR':
+                elif action == 'SPR':
                     # Handle stock splits by adjusting share count without altering cost basis
                     qty_str = str(row['Quantity'])
                     try:
@@ -448,6 +446,7 @@ class EnhancedPortfolioAnalyzer:
                         self.holdings[symbol]['quantity'] = new_qty
                     else:
                         self.holdings[symbol]['quantity'] = new_qty
+
                 
                 # Store transaction for reference
                 self.holdings[symbol]['transactions'].append({
