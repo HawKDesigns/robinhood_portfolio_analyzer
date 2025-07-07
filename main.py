@@ -36,6 +36,7 @@ import math
 import argparse
 import re
 from contextlib import redirect_stdout
+import html
 
 warnings.filterwarnings('ignore')
 try:
@@ -2623,8 +2624,59 @@ def save_analysis_to_pdf(content, filename="portfolio_analysis.pdf"):
         print(f"❌ Error generating PDF: {e}")
         return False
 
-def capture_analysis_output():
-    """Capture all analysis output to a string"""
+def save_analysis_to_html(content, metrics, filename="portfolio_analysis.html"):
+    """Save the analysis content and basic charts to an HTML file"""
+
+    print(f"\n💾 Generating HTML report: {filename}")
+
+    try:
+        holdings_df = pd.DataFrame(metrics.get('holdings_summary', []))
+        if not holdings_df.empty:
+            table_html = holdings_df[
+                ['symbol', 'quantity', 'current_value', 'unrealized_gain_pct']
+            ].to_html(index=False, float_format=lambda x: f"{x:,.2f}")
+        else:
+            table_html = "<p>No holdings data available.</p>"
+
+        sectors = list(metrics.get('sector_allocation', {}).keys())
+        values = list(metrics.get('sector_allocation', {}).values())
+        if sectors and values:
+            fig = px.pie(names=sectors, values=values, title="Sector Allocation")
+            chart_html = pio.to_html(fig, include_plotlyjs='cdn', full_html=False)
+        else:
+            chart_html = "<p>No sector data available.</p>"
+
+        html_content = f"""
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Portfolio Analysis Report</title>
+</head>
+<body>
+    <h1>Portfolio Analysis Report</h1>
+    <pre>{html.escape(content)}</pre>
+    <h2>Holdings Summary</h2>
+    {table_html}
+    <h2>Sector Allocation</h2>
+    {chart_html}
+</body>
+</html>
+"""
+
+        # Write using UTF-8 to handle emojis and other unicode characters
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(html_content)
+        print(f"✅ HTML report saved successfully: {filename}")
+        return True
+    except Exception as e:
+        print(f"❌ Error generating HTML: {e}")
+        return False
+
+def capture_analysis_output(return_metrics: bool = False):
+    """Capture all analysis output to a string.
+
+    If ``return_metrics`` is True, also return the metrics dictionary.
+    """
     
     output_buffer = io.StringIO()
     
@@ -2712,6 +2764,8 @@ def capture_analysis_output():
         
         # Get the captured output
         content = output_buffer.getvalue()
+        if return_metrics:
+            return content, metrics
         return content
         
     except Exception as e:
@@ -2723,8 +2777,10 @@ def main():
     """Main function with command line argument parsing"""
     
     parser = argparse.ArgumentParser(description='Portfolio Analysis Tool')
-    parser.add_argument('--save', action='store_true', 
+    parser.add_argument('--save', action='store_true',
                        help='Save analysis to PDF file in addition to console output')
+    parser.add_argument('--html', action='store_true',
+                       help='Save analysis to interactive HTML report')
     
     args = parser.parse_args()
     
@@ -2743,7 +2799,21 @@ def main():
         
         if success:
             print(f"\n📁 Analysis saved to: {filename}")
-    else:
+
+    if args.html:
+        print("🔄 Running analysis and capturing output for HTML...")
+        content, metrics = capture_analysis_output(return_metrics=True)
+
+        print(content)
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        html_filename = f"portfolio_analysis_{timestamp}.html"
+        success_html = save_analysis_to_html(content, metrics, html_filename)
+
+        if success_html:
+            print(f"\n📁 Analysis saved to: {html_filename}")
+
+    if not (args.save or args.html):
         # Just run normal console analysis
         display_comprehensive_portfolio_analysis()
 
